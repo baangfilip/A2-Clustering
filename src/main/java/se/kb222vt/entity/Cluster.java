@@ -28,7 +28,8 @@ public class Cluster {
 			c.clearPrevAssignments(); //saves 7-800kb for 99 blogs and 10 centroids (50%)
 			c.getWords().clear();//saves 100kb for 99 blogs and 10 centroids (12%)
 			for(Blog blog: c.getBlogs()) {
-			//	blog.getWords().clear();//saves 700kb for 99 blogs with 706 words (97%)
+				//TODO: create a copy of the blogs first 
+				//blog.getWords().clear();//saves 700kb for 99 blogs with 706 words (97%)
 			}
 		}
 	}

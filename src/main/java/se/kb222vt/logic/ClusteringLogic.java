@@ -82,7 +82,7 @@ public class ClusteringLogic {
 			iterations++;
 			System.out.println("Iteration: " + iterations);
 			if(!stopOnNoChange) {
-				continue; //if we don't shouldnt stop on no change, skip the last part of the iterations
+				continue; //if we shouldnt stop on no change, skip the last part of the iterations
 			}
 			boolean sameAssignments = true;
 			for(Centroid c : centroids) {
