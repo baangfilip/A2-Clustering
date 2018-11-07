@@ -19,12 +19,13 @@ public class ClusteringLogic {
 	/**
 	 * Cluster blogs with k-means-clustering algorithm. 
 	 * Algorithm retrieved from: http://coursepress.lnu.se/kurs/web-intelligence/files/2018/10/3.-Clustering.pdf 5/11 2018
-	 * @param maxIterations how many iterations of k-means algorithm should be runned, if zero it will run until centroids doesnt change anymore
+	 * @param maxIterations how many iterations of k-means algorithm should be runned
 	 * @param blogs the blogs to cluster
 	 * @param numberOfCentroids number of centroids in the cluster
+	 * @param stopOnNoChange wheter to stop iterating when the blogs have been assigned to the same centroid twice ie. there will be no more change
 	 * @return Cluster
 	 */
-	public Cluster kMeansCluster(int maxIterations, HashMap<String, Blog> blogs, int numberOfCentroids) {
+	public Cluster kMeansCluster(int maxIterations, HashMap<String, Blog> blogs, int numberOfCentroids, boolean stopOnNoChange) {
 		//Generate K random centroids
 		if(blogs.size() < 1) {
 			throw new IllegalArgumentException("There are no blogs to cluster");
@@ -78,21 +79,22 @@ public class ClusteringLogic {
 					entry.setValue(c.getBlogs().size() < 1 ? 0 : total/c.getBlogs().size());
 				}
 			}
+			iterations++;
+			System.out.println("Iteration: " + iterations);
+			if(!stopOnNoChange) {
+				continue; //if we don't shouldnt stop on no change, skip the last part of the iterations
+			}
 			boolean sameAssignments = true;
 			for(Centroid c : centroids) {
 				sameAssignments = c.previousEqualsCurrentAssignments();
 				if(!sameAssignments) //if even one centroid doesnt have the same assignment, don't keep looking
 					break;
 			}
-			System.out.println("Iteration: " + iterations);
 			if(sameAssignments) {
 				System.out.println("The centroids have the same assignments, so break loop at iteration: " + iterations);
 				break;
 			}
-			iterations++;
 		}
-		for(Centroid c : centroids)
-			c.clearPrevAssignments();
 		//End of iteration loop – all done
 		return new Cluster(centroids, iterations);
 	}

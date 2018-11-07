@@ -14,6 +14,9 @@ public class TestClusteringLogic {
 	
 	private ClusteringLogic logic = new ClusteringLogic();
 	
+	/*
+	 * Hard to test number of iterations since centroids are randomly placed.
+	 */
 	@Test
 	public void testKMeansCluster() {
 		HashMap<String, Blog> blogs = new HashMap<String, Blog>();
@@ -55,7 +58,7 @@ public class TestClusteringLogic {
 		
 		int nbrOfCenteroids = 2;
 		int iterations = 10000;
-		Cluster cluster = logic.kMeansCluster(iterations, blogs, nbrOfCenteroids);
+		Cluster cluster = logic.kMeansCluster(iterations, blogs, nbrOfCenteroids, true);
 		assertEquals("There should be 1 iteration for this set of blogs", 1, cluster.getIterations());
 	}
 	
