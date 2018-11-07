@@ -1,83 +1,92 @@
 $(function() {
-	console.log("Hello document");
+	getBlogs();
+	$("#group-blogs input[type=number]").on('keyup', function(e){
+		validateInput(e.target);
+	});
+	$("form").submit(function(event) {
+		event.preventDefault();
+		$("#form-status").html("Loading..");
+		let formValid = true;
+		$("#group-blogs input[type=number]").each(function(){
+			console.log("valid input? " + validateInput(this));
+			if(!validateInput(this)){
+				formValid = false;
+			}
+		});
+		if(formValid){
+			console.log("get grouped blogs");
+			let formArr = $(this).serializeArray();
+			let json = formToJson(formArr);
+			getBlogs(json);
+			$("#form-status").html("");
+		}
+	});
 });
 
-//Blog	BuzzMachine
-/*
-china		0
-kids		0
-music		1
-yahoo		1	
-want	1	
-wrong	1	
-service	0	
-tech	0	
-saying	2	
-lots	0	
-had	0	
-address	0	
-working	1	
-following	0	
-years	1	
-didn	1	
-internet	3	
-wants	0	
-photos	0	
-former	1	
-technology	0	
-being	1	
-traffic	0	
-small	0	
-past	0	
-full	0	
-november	0	
-experience	0	
-door	0	
-company	0	
-learn	0	
-paper	0	
-research	0	
-sell	0	
-self	0	
-sometimes	0	
-couple	0	
-video	3	
-makes	1	
-next	0	
-process	0	
-books	0	
-could	0	
-stuff	1	
-audio	1	
-web	1	
-become	1	
-problem	0	
-details	0	
-worth	0	
-provide	0	
-feeds	1	
-another	0	
-john	2	
-away	2	
-hand	1	
-thanks	0	
-night	2	
-test	0	
-update	0	
-guy	0	
-cost	0	
-product	0	
-still	4	
-non	0	
-drop	0	
-year	0	
-tried	0	
-america	1	
-amp	0	
-start	1	
-podcast	1	
-month	0	
-advertising	5	
-0	0	0	3	4	0	0	0	0	2	0	0	0	0	1	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	3	0	0	1	0	0	1	3	0	0	0	0	1	1	0	2	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	3	0	0	1	0	3	0	0	1	0	0	1	0	0	1	0	0	1	0	2	2	0	1	0	0	0	0	1	3	0	2	0	0	1	0	0	0	0	0	0	0	2	0	0	0	0	1	0	0	0	0	2	2	0	0	0	1	0	0	2	1	0	0	0	0	1	0	0	0	0	1	0	0	0	0	1	0	0	0	2	0	1	1	0	0	0	0	0	3	0	0	0	0	0	0	0	0	0	0	3	0	0	0	9	0	0	1	0	0	0	1	0	0	0	1	0	0	0	1	0	0	0	0	0	3	1	0	0	0	0	3	1	0	0	0	2	0	0	0	0	0	0	0	0	0	0	1	0	0	0	0	0	2	0	0	0	0	1	0	0	1	0	0	1	0	1	2	0	0	0	1	0	1	0	0	0	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	1	1	0	0	0	0	0	0	1	0	0	1	0	1	0	0	0	0	0	0	0	0	0	3	1	0	0	0	0	1	2	0	1	0	0	1	0	1	0	0	0	0	1	0	0	0	0	2	0	1	0	0	0	0	5	1	1	0	1	0	1	1	0	0	0	0	0	0	0	0	1	0	2	0	0	0	0	0	0	0	2	0	0	0	0	0	0	0	1	0	0	1	0	0	0	0	2	0	0	0	0	0	0	0	1	0	0	0	0	2	0	0	0	2	0	1	0	4	2	0	0	0	1	1	0	1	0	0	0	0	1	0	2	1	0	0	0	0	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	0	1	0	0	0	0	0	0	0	0	1	0	0	0	0	0	1	0	0	1	0	0	1	0	0	3	0	2	1	1	0	0	0	0	0	0	0	0	0	0	0	0	0	0	0	1	2	0	0	1	0	1	0	1	2	1	1	0	0	0	0	2	1	0	1	0	2	0	0	1	0	0	0	0	0	0	1	0	0	0	1	0	0	0	0	0	0	1	0	0	1	0	0	0	0	1	0	0	0	2	1	0	0	0	2	0	0	0	1	1	0	0	0	1	0	0	0	0	2	0	0	2	0	0	1	1	1	0	0	1	0	0	0	0	0	0	0	0	0	1	0	0	0	1	0	0	1	0	0	2	0	1	0	4	0	1	0	0	0	1	0	0	1	0	0	0	0	0	0	0	0	0	0	1	0	3	0	0	0	0	0	1	1	0	0	0	1	0	1	2	0	0	0	0	3	0	1	0	0	5	3	0
-ask	almost	systems	american	culture	close	pictures	smart	showing	popular	application	e	dvd	camera	links	including	during	university	special	times	party	home	display	star	likely	room	before	personal	digg	yes	yet	save	deal	magazine	down	weekend	international	box	visit	making	interesting	morning	enough	sound	images	released	again	u	hour	days	needs	coming	through	services	point	cut	source	though	planet	entire	access	turn	happens	development	school	however	news	conference	n	gave	level	posts	goes	sure	later	case	director	without	list	version	rather	short	friday	story	store	kind	wrote	questions	long	nice	users	include	g	why	local	job	press	wasn	fair	best	readers	life	possible	fox	call	happy	team	current	love	applications	data	million	future	take	industry	act	image	ad	am	al	hours	action	sense	information	always	week	number	play	plan	cover	set	whole	community	recent	location	anything	link	line	code	results	send	sent	let	high	allow	bad	david	said	hope	email	co	official	above	security	comments	together	global	flash	p	change	live	means	remember	half	space	shows	size	article	comes	media	touch	real	read	trying	strong	since	put	pretty	won	else	used	user	run	doesn	go	download	click	products	keep	anyway	she	written	flickr	attention	addition	mail	blogs	companies	never	type	tell	give	isn	matter	stop	form	digital	guys	maybe	nbsp	language	question	were	black	behind	reading	according	same	audience	problems	videos	starting	those	search	late	everyone	idea	b	blogging	create	understand	bill	fun	moment	per	forward	giving	six	ll	red	value	center	latest	works	minutes	every	enjoy	end	got	already	tool	took	talking	several	core	head	hear	r	events	model	oh	included	program	worse	design	options	september	might	added	recently	pm	issues	usb	sort	something	own	record	four	example	feature	series	message	project	came	country	support	inside	leave	open	city	allen	drive	sites	screen	rest	around	her	tv	th	large	found	microsoft	available	person	d	continue	clinton	posted	having	young	try	move	system	face	fact	bring	should	site	government	software	announced	interview	standard	created	air	launched	photo	board	post	months	war	true	car	heard	happen	looking	card	care	national	price	between	comment	rules	lot	iraq	family	takes	taken	history	help	soon	issue	reason	launch	look	ready	game	within	win	started	hands	completely	buy	based	demo	well	page	washington	stories	friends	president	weeks	side	mean	reader	features	street	mind	seen	seem	decided	against	website	human	may	mac	man	talk	thing	little	anyone	show	money	general	film	important	chris	public	playing	hard	print	members	done	least	part	believe	simple	simply	single	f	apparently	taking	ads	add	although	instead	original	under	cause	each	top	too	tom	radio	rss	watch	report	games	everything	plus	cool	name	place	given	gives	copy	style	college	key	engine	seems	known	wouldn	expect	feed	feel	says	nothing	creating	political	filed	once	light	related	ipod	gets	made	whether	below	second	reports	until	hot	bush	release	result	asked	pro	player	things	easy	right	old	o	along	such	course	quite	san	say	saw	note	knew	pages	going	where	power	favorite	complete	bloggers	social	via	plans	major	movie	currently	ago	great	tools	doing	haven	subject	device	etc	less	five	does	includes	monday	chance	phones	told	word	work	law	order	office	network	received	speak	marketing	dead	market	write	aol	online	title	thinking	early	business	area	building	actually	event	mobile	clear	x	probably	both	youtube	cell	control	front	blogger	exactly	need	able	computer	state	group	pc	piece	using	ever	better	went	content	bar	three	left	super	offering	daily	finally	did	americans	especially	across	mark	different	pay	running	critical	share	someone	easily	house	built	build	find	please	itself	yesterday	big	bit	google	often	either	body	others	text	looks	thought	host	phone	must	writing	free	wanted	players	check	longer	white	ways	come	blog	earlier	calls	far	generation	windows	hit	him	art	intelligence	various	use	c	moving	called	notes	apple	women	choose	york	myspace	ones	words	view	because	getting	book
-*/
+function validateInput(input){
+	let $input = $(input);
+	if($input.val() < 1){
+		$input.addClass("is-invalid");
+		$input.parent().find(".invalid-feedback").show();
+		return false;
+	}else{
+		$input.removeClass("is-invalid");
+		$input.parent().find(".invalid-feedback").hide();
+		return true;
+	}
+}
+
+function formToJson(form){
+	const json = {};
+	const fields = form.values();
+	for(const field of fields){
+		json[field.name] = field.value || '';
+	}
+	return json;
+}
+
+function getBlogs(form){
+	let url = `API/blogs/`;
+	if(form){
+		url += `cluster/?centroids=${form.centroids}&maxIterations=${form.maxIterations}&stopOnNoChange=${form.stopOnNoChange ? 1 : 0}&clean=1&nocache=${new Date().getTime()}`;
+	}
+	$.getJSON(url, function(data) {
+		var blogs = [{
+			'text' : 'Blogs',
+			'state' : {
+				'opened' : true,
+			},
+			'children' : []
+		}];
+		if(form){ //its clustered response parse accordingly
+			$.each(data.centroids, function(index, group) {
+				let centroid = {
+					'text' : `${group.name} (Blogs: ${group.blogs.length} )`,
+					'state' : {
+						'opened' : false,
+					},
+					'children' : []
+				};
+				$.each(group.blogs, function(index, blog) {
+					centroid.children.push(blog.title);
+				});
+				blogs[0].children.push(centroid);
+			});
+			$("#meta").show();
+			$("#blogcount").text(data.numberOfBlogs);
+			$("#iterations").text(data.iterations);
+		}else{
+			$.each(data, function(blog, object) {
+				blogs[0].children.push(blog);
+			});
+		}
+		renderTree(blogs);
+	});
+}
+function renderTree(blogs){
+	$('#jstree').jstree()
+	$('#jstree').jstree(true).settings.core.data = blogs;
+	$('#jstree').jstree(true).refresh();
+	
+}
+

@@ -37,7 +37,7 @@ public class Application implements SparkApplication {
 			});
         
 
-        get("/API/cluster/", ClusterController.cluster);
+        get("/API/blogs/cluster/", ClusterController.cluster);
 
         get("/API/blogs/", ClusterController.blogs);
         
