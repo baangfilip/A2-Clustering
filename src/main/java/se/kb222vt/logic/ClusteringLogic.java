@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+
 import se.kb222vt.entity.Blog;
 import se.kb222vt.entity.Centroid;
 import se.kb222vt.entity.Cluster;
@@ -30,35 +32,38 @@ public class ClusteringLogic {
 		HashMap<String, Integer> meta = getMetadataFromBlogs(blogs);
 		ArrayList<Centroid> centroids = new ArrayList<>();
 		for(int i = 0; i < numberOfCentroids; i++) {
-			Centroid c = new Centroid();
+			Centroid c = new Centroid("Centroid " + i);
 			for(Entry<String, Integer> entry : meta.entrySet()) {
 				//Random word count
-				c.addWord(entry.getKey(), rand.nextInt(entry.getValue()) + 0);
+				int max = entry.getValue();
+				int random = (max > 0 ? rand.nextInt(max) + 0 : 0);
+				c.addWord(entry.getKey(), random);
 			}
 			centroids.add(c);
 		}
 		//Iteration loop
-		for (int i = 0; i < maxIterations; i++) { 
+		int iterations = 0;
+		while(iterations < maxIterations) { 
 			//Clear assignments for all centroids
 			for(Centroid c : centroids)
 				c.clearBlogs();
 			
 			//Assign each blog to closest centroid
 			for(Blog blog : blogs.values()){ 
-				double distance = Double.MAX_VALUE;
-				Centroid closest = null;
+				double bestSim = -1; //-1 is the worst correlation
+				Centroid closest = centroids.get(0);
 				//Find closest centroid
 				for (Centroid c : centroids) {
-					double cDist = pearsonCorrelation(c, blog); //compare our made up blog (centroid) with actual blog
-					if (cDist < distance) {
+					
+					double similarity = pearsonCorrelation(c, blog); //compare our made up blog (centroid) with actual blog
+					if (similarity > bestSim) {
 						closest = c;
-						distance = cDist;
+						bestSim = similarity;
 					}
 				}
 				//Assign blog to centroid
 				closest.assignBlog(blog);
 			}
-			
 			//Re-calculate center for each centroid
 			for(Centroid c : centroids){
 				//Find average count for each word
@@ -70,35 +75,49 @@ public class ClusteringLogic {
 						total += blog.getWords().get(word);
 					}
 					//Update word count for the centroid
-					entry.setValue(total/c.getBlogs().size());
+					entry.setValue(c.getBlogs().size() < 1 ? 0 : total/c.getBlogs().size());
 				}
 			}
-			//TODO: if each centroid have the same blogs as last run, break out of maxIterations loop break;
+			boolean sameAssignments = true;
+			for(Centroid c : centroids) {
+				sameAssignments = c.previousEqualsCurrentAssignments();
+				if(!sameAssignments) //if even one centroid doesnt have the same assignment, don't keep looking
+					break;
+			}
+			System.out.println("Iteration: " + iterations);
+			if(sameAssignments) {
+				System.out.println("The centroids have the same assignments, so break loop at iteration: " + iterations);
+				break;
+			}
+			iterations++;
 		}
+		for(Centroid c : centroids)
+			c.clearPrevAssignments();
 		//End of iteration loop – all done
-		return new Cluster(centroids);
+		return new Cluster(centroids, iterations);
 	}
 	
 	/**
-	 * Compare a blog with a centroid using pearson correlation
+	 * Compare a blog with a centroid using pearson correlation. Result between -1 and 1, the higher result the better match. Source: https://www.researchgate.net/publication/317349295_Calculating_the_User-item_Similarity_using_Pearson's_and_Cosine_Correlation_Senthilkumar_M 
 	 * @param centroid
-	 * @param anotherBlog
+	 * @param blog
 	 * @return the sum of the pearson correlation between blogs
 	 */
-	private double pearsonCorrelation(Centroid centroid, Blog blog2) {
+	private double pearsonCorrelation(Centroid centroid, Blog blog) {
 		double sum1 = 0, sum2 = 0, sum1sq = 0, sum2sq = 0, pSum = 0;
-		HashMap<String, Integer> blog2Words = blog2.getWords();
+		HashMap<String, Integer> blogWords = blog.getWords();
 		int matchingWords = 0;
 		for(Map.Entry<String, Double> entry : centroid.getWords().entrySet()) {
 			String word = entry.getKey();
-			double blog1WordCount = entry.getValue();
-			if(blog2Words.get(word) > 0) { 
-				int blog2WordCount = blog2Words.get(word);
-				sum1 += blog1WordCount;
-				sum2 += blog2WordCount;
-				sum1sq += Math.pow(blog1WordCount, 2);
-				sum2sq += Math.pow(blog2WordCount, 2);
-				pSum += blog1WordCount * blog2WordCount;
+			//System.out.println("Centroid looking for: " + word + ", " + blog2.getTitle() + " has " + blog2Words.get(word) + " instances of " + word);
+			double centeroidAmount = entry.getValue();
+			if(blogWords.get(word) > 0) { 
+				int blog2Word = blogWords.get(word);
+				sum1 += centeroidAmount;
+				sum2 += blog2Word;
+				sum1sq += Math.pow(centeroidAmount, 2);
+				sum2sq += Math.pow(blog2Word, 2);
+				pSum += centeroidAmount * blog2Word;
 				matchingWords++;
 			}else {
 				continue; //both blogs doesnt have this word
@@ -107,9 +126,13 @@ public class ClusteringLogic {
 		if(matchingWords < 1) {
 			return 0;
 		}
-		double num = pSum - (sum1 * sum2 / matchingWords);
+		double num = pSum - ((sum1 * sum2) / matchingWords);
 		double den = Math.sqrt((sum1sq - Math.pow(sum1, 2) / matchingWords) * (sum2sq - Math.pow(sum2, 2) / matchingWords));
-		return num/den;
+		Double result = new Double(num/den);
+		if(result.isNaN()) {
+			return 0;
+		}
+		return result.doubleValue();
 	}
 	
 	public HashMap<String, Integer> getMetadataFromBlogs(HashMap<String, Blog> blogs){
@@ -117,10 +140,10 @@ public class ClusteringLogic {
 		for(Blog blog : blogs.values()) {
 			for(Entry<String, Integer> blogWord : blog.getWords().entrySet()) {
 				int amount = blogWord.getValue();
-				String title = blogWord.getKey();
+				String word = blogWord.getKey();
 				//if HashMap words doesnt already contain the word or if the amount of the word is bigger add it (no duplicates allowed anyways)
-				if(words.containsKey(title) && amount > words.get(title)) {
-					words.put(title, amount);
+				if(!words.containsKey(word) || (words.containsKey(word) && amount > words.get(word))) {
+					words.put(word, amount);
 				}
 			}
 		}
