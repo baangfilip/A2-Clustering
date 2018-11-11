@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
 import se.kb222vt.entity.Blog;
 import se.kb222vt.entity.Centroid;
@@ -51,15 +50,15 @@ public class ClusteringLogic {
 			
 			//Assign each blog to closest centroid
 			for(Blog blog : blogs.values()){ 
-				double bestSim = -1; //-1 is the worst correlation
+				double bestDist = Double.MAX_VALUE; 
 				Centroid closest = centroids.get(0);
 				//Find closest centroid
 				for (Centroid c : centroids) {
 					
-					double similarity = pearsonCorrelation(c, blog); //compare our made up blog (centroid) with actual blog
-					if (similarity > bestSim) {
+					double distance = pearsonCorrelation(c, blog); //compare our made up blog (centroid) with actual blog
+					if (distance < bestDist) {
 						closest = c;
-						bestSim = similarity;
+						bestDist = distance;
 					}
 				}
 				//Assign blog to centroid
@@ -100,10 +99,11 @@ public class ClusteringLogic {
 	}
 	
 	/**
-	 * Compare a blog with a centroid using pearson correlation. Result between -1 and 1, the higher result the better match. Source: https://www.researchgate.net/publication/317349295_Calculating_the_User-item_Similarity_using_Pearson's_and_Cosine_Correlation_Senthilkumar_M 
+	 * Compare a blog with a centroid using pearson correlation. Result between 0 and 1, the lower result the better match. 
+	 * Source: Programming Collective Intelligence: P. 35 
 	 * @param centroid
 	 * @param blog
-	 * @return the sum of the pearson correlation between blogs
+	 * @return the sum of the pearson correlation between centroid and blog -1 to be achieve smaller values for more similarity 0 most similar and 1 not similar
 	 */
 	private double pearsonCorrelation(Centroid centroid, Blog blog) {
 		double sum1 = 0, sum2 = 0, sum1sq = 0, sum2sq = 0, pSum = 0;
@@ -134,7 +134,7 @@ public class ClusteringLogic {
 		if(result.isNaN()) {
 			return 0;
 		}
-		return result.doubleValue();
+		return 1-result.doubleValue();
 	}
 	
 	public HashMap<String, Integer> getMetadataFromBlogs(HashMap<String, Blog> blogs){

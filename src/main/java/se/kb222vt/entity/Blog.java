@@ -44,6 +44,10 @@ public class Blog {
 		}
 	}
 	
+	public void setWords(HashMap<String, Integer> wordMap) {
+		this.words = wordMap;
+	}
+	
 	public String toJson() {
 		return gson.toJson(this);
 	}
@@ -56,6 +60,6 @@ public class Blog {
 		}        
 	 };
 	 return comparator;
-	}  
+	}
 	
 }

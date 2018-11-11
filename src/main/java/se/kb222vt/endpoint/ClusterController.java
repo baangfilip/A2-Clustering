@@ -28,7 +28,7 @@ public class ClusterController {
 		if(centroids == null)
     		throw new IllegalArgumentException("Missing centroids param");
 
-    	//TODO: Decide centroids if we dont get any from request maybe
+    	//TODO: Decide centroids if we dont get any from request maybe: http://infolab.stanford.edu/~ullman/mmds/ch7.pdf -> page 256, bottom of page
     	boolean bStopOnNoChange = Integer.parseInt(stopOnNoChange) > 0;
     	int iMaxIterations = Integer.parseInt(maxIterations);
     	int iCentroids = Integer.parseInt(centroids);
