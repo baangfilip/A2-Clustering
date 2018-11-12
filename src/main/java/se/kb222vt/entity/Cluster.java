@@ -4,17 +4,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
+
 public class Cluster {
 	private ArrayList<Centroid> centroids = new ArrayList<>();
 	private int numberOfBlogs;
 	private int iterations;
+	private HashMap<Integer, ArrayList<Point>> pointiterations = new HashMap<>();
 	
-	public Cluster(ArrayList<Centroid> centroids, int iterations) {
+	public Cluster(ArrayList<Centroid> centroids, int iterations, HashMap<Integer, ArrayList<Point>> pointiterations) {
 		this.centroids = centroids;
 		for(Centroid c : centroids) {
 			this.numberOfBlogs += c.getBlogs().size();
 		}
 		this.iterations = iterations;
+		this.pointiterations = pointiterations;
 	}
 	
 	public int getIterations() {
@@ -38,5 +41,9 @@ public class Cluster {
 			Collections.sort(c.getBlogs(), Blog.getBlogByTitle());
 			
 		}
+	}
+	
+	public ArrayList<Centroid> getCentroids(){
+		return this.centroids;
 	}
 }
