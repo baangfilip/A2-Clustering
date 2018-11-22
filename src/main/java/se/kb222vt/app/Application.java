@@ -25,22 +25,18 @@ public class Application implements SparkApplication {
 	//putting some logic here since it will be so much overhead to put it somewhere else
 	
 	private Gson gson = new Gson();
-	private String blogdataCSV = "webapps/rec/WEB-INF/classes/data/blogdata.txt"; //This will not work for any name for the webapp: https://github.com/perwendel/spark/pull/658/files
+	private String blogdataCSV = "webapps/clustering/WEB-INF/classes/data/blogdata.txt"; //This will not work for any name for the webapp: https://github.com/perwendel/spark/pull/658/files
 	public static HashMap<String, Blog> blogs = new HashMap<String, Blog>();
 	
 	@Override
 	public void init() {
 		System.out.println("Start endpoints");
 		exception(IllegalArgumentException.class, (e, req, res) -> {
-			  res.status(404);
-			  res.body(gson.toJson(e));
-			});
-        
-
+		  res.status(404);
+		  res.body(gson.toJson(e));
+		});
         get("/API/blogs/cluster/", ClusterController.cluster);
-
         get("/API/blogs/", ClusterController.blogs);
-        
         try {
         	readData();
 			System.out.println("Found: " + blogs.size() + " blogs");
@@ -66,6 +62,4 @@ public class Application implements SparkApplication {
 	public void setBlogdataCSV(String path) {
 		this.blogdataCSV = path;
 	}
-	
-	
 }

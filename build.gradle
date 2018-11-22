@@ -25,7 +25,7 @@ repositories {
 //}
 war {
 	webXml = file("src/web.xml")
-	archiveName = 'rec.war'
+	archiveName = 'clustering.war'
 }
 
 dependencies {
